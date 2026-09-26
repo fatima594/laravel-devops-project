@@ -1,0 +1,52 @@
+services:
+
+  # Laravel / PHP application
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+
+    container_name: laravel-app
+
+    ports:
+      - "8000:8000"
+
+    # Load Laravel environment variables from .env.docker
+    env_file:
+      - .env.docker
+
+    # Start Laravel only after MySQL is healthy
+    depends_on:
+      db:
+        condition: service_healthy
+
+
+  # MySQL database
+  db:
+    image: mysql:8.0
+
+    container_name: laravel-db
+
+    # Load MySQL environment variables from .env.docker
+    env_file:
+      - .env.docker
+
+    ports:
+      - "3307:3306"
+
+    # Keep MySQL data even if the container is removed
+    volumes:
+      - mysql_data:/var/lib/mysql
+
+    # Check if MySQL is ready to accept connections
+    healthcheck:
+      test: ["CMD-SHELL", "mysqladmin ping -h localhost -uroot -p$$MYSQL_ROOT_PASSWORD"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+      start_period: 10s
+
+
+# Persistent MySQL storage
+volumes:
+  mysql_data:
