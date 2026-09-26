@@ -6,6 +6,7 @@ use Illuminate\Support\ServiceProvider;
 use App\Http\Services\Image\ImageService;
 use Intervention\Image\Facades\Image;
 use App\Models\SocialMedia;
+use Illuminate\Support\Facades\Schema;
 
 
 
@@ -31,12 +32,22 @@ class AppServiceProvider extends ServiceProvider
     /**
      * Bootstrap any application services.
      */
-    public function boot(): void
-    {
-        // جلب كل وسائل التواصل الاجتماعي
-        $socialMedias = SocialMedia::all();
+    // public function boot(): void
+    // {
+    //     // جلب كل وسائل التواصل الاجتماعي
+    //     $socialMedias = SocialMedia::all();
 
-        // مشاركة المتغير مع كل الـ views
-        view()->share('socialMedias', $socialMedias);
+    //     // مشاركة المتغير مع كل الـ views
+    //     view()->share('socialMedias', $socialMedias);
+    // }
+    public function boot(): void
+{
+    if (Schema::hasTable('social_media')) {
+        $socialMedias = SocialMedia::all();
+    } else {
+        $socialMedias = collect();
     }
+
+    view()->share('socialMedias', $socialMedias);
+}
 }
