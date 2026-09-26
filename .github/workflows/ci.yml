@@ -17,21 +17,20 @@ jobs:
         uses: shivammathur/setup-php@v2
         with:
           php-version: '8.2'
-          extensions: pdo_mysql
+          extensions: pdo_mysql, sqlite3, pdo_sqlite
+
+      - name: Prepare test environment
+        run: |
+          cp .env.example .env
+          touch database/database.sqlite
+          echo "DB_CONNECTION=sqlite" >> .env
+          echo "DB_DATABASE=$(pwd)/database/database.sqlite" >> .env
 
       - name: Install Composer dependencies
         run: composer install --no-interaction --prefer-dist
 
-      - name: Prepare Laravel environment
-        run: |
-          cp .env.example .env
-          php artisan key:generate
-
-      - name: Configure test database
-        run: |
-          touch database/database.sqlite
-          echo "DB_CONNECTION=sqlite" >> .env
-          echo "DB_DATABASE=$(pwd)/database/database.sqlite" >> .env
+      - name: Generate application key
+        run: php artisan key:generate
 
       - name: Run Laravel tests
         run: php artisan test
